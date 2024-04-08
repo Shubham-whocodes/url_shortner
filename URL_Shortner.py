@@ -41,6 +41,11 @@ def main():
                 user_id = authenticate_user(username, password)
                 if user_id:
                     st.success("Login successful! User ID: {}".format(user_id))
+                    url_to_check = st.text_input("Enter Your Short URL :")
+                    if st.button('Get URL Analysis'):
+                        pass
+
+                    
                 else:
                     st.error("Invalid username or password.")
             else:
