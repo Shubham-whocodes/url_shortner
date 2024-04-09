@@ -1,21 +1,30 @@
 import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import auth
-
+from firebase_admin import credentials, auth , db
 
 cred = credentials.Certificate("key.json")
-# app = firebase_admin.initialize_app(cred)
+# firebase_admin.initialize_app(cred, {
+#    "databaseURL":"https://urlshortner-8ea0b-default-rtdb.firebaseio.com/"
+# })
 
-def authenticate_user(email, password):
-    try:
-        user = auth.get_user_by_email(email)
-        return user.uid
-    except auth.AuthError as e:
-        return None
+ref = db.reference('/')
+
+# cred = credentials.Certificate("key.json")
+# firebase_admin.initialize_app(cred,{"databaseURL":"https://urlshortner-8ea0b-default-rtdb.firebaseio.com/"})
+
+def authenticate_user(username, password):
+    users = ref.child('users').get()
+    if users:
+        for user_id, user_data in users.items():
+             if user_data['username'] == username and user_data['password'] == password:
+                  return True
+    return False
     
-def create_user(email, password):
+def create_user(username, password): 
     try:
-        user = auth.create_user(email=email, password=password)
-        return user.uid
-    except auth.AuthError as e:
-        return None
+        ref.child('users').push({
+            'username': username,
+            'password': password
+        })
+        return True
+    except Exception as e :
+        return False
