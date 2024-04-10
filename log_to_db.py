@@ -1,5 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials, auth , db
+import pandas as pd
 
 cred = credentials.Certificate("key.json")
 # firebase_admin.initialize_app(cred, {
@@ -7,9 +8,6 @@ cred = credentials.Certificate("key.json")
 # })
 
 ref = db.reference('/')
-
-# cred = credentials.Certificate("key.json")
-# firebase_admin.initialize_app(cred,{"databaseURL":"https://urlshortner-8ea0b-default-rtdb.firebaseio.com/"})
 
 def authenticate_user(username, password):
     users = ref.child('users').get()
@@ -25,6 +23,30 @@ def create_user(username, password):
             'username': username,
             'password': password
         })
-        return True
     except Exception as e :
-        return False
+        print(e)
+    
+def push_new_url_entry(username,url,shorturl):
+    try:
+        ref.child('url_logs').push({
+            'username': username,
+            'url': url,
+            'shorturl':shorturl
+        })
+    except Exception as e :
+        print(e)
+
+def get_user_history(username):
+    url_logs = ref.child('url_logs').get()
+    output = pd.DataFrame()
+    if url_logs:
+        for user_id, user_data in url_logs.items():
+             if user_data['username'] == username:
+                temp = {
+                    'Original Url' : [user_data['url']],
+                    'Short Url' : [user_data['shorturl']]
+                }
+                t = pd.DataFrame.from_dict(temp)
+                output = output._append(t)
+        return output
+            
